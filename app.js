@@ -17,8 +17,15 @@ function k8Listerner() {
     // temp = [];
     console.clear();
     data.body.items.forEach((element) => {
-      console.log(element.metadata.name + " " + element.status.succeeded);
+      console.log("Running : "+element.metadata.name);
 
+      if (element.status.succeeded) {
+        k8sApi2
+          .deleteNamespacedJob(element.metadata.name, "default")
+          .then((reuslt) => {
+            console.log("Job Deleted: "+element.metadata.name);
+          });
+      }
       // temp.push(element.metadata.name);
     });
   });

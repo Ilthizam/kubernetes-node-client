@@ -17,15 +17,20 @@ function k8Listerner() {
     // temp = [];
     console.clear();
     data.body.items.forEach((element) => {
-      console.log("Running : "+element.metadata.name);
-
-      if (element.status.succeeded) {
-        k8sApi2
-          .deleteNamespacedJob(element.metadata.name, "default")
-          .then((reuslt) => {
-            console.log("Job Deleted: "+element.metadata.name);
-          });
+      if (element.status.active > 0) {
+        console.log("Running : " + element.metadata.name);
+      } else {
+        if (element.status.succeeded > 0) {
+          k8sApi2
+            .deleteNamespacedJob(element.metadata.name, "default")
+            .then((reuslt) => {
+              console.log("Job Deleted: " + element.metadata.name);
+            });
+        } else {
+          fmt.Printf("Failed - %s\n", job.Name);
+        }
       }
+
       // temp.push(element.metadata.name);
     });
   });
@@ -69,23 +74,12 @@ app.get("/getPods", (req, res) => {
   });
 });
 
-function makeid(length) {
-  var result = "";
-  var characters = "abcdefghijklmnopqrstuvwxyz0123456789";
-  var charactersLength = characters.length;
-  for (var i = 0; i < length; i++) {
-    result += characters.charAt(Math.floor(Math.random() * charactersLength));
-  }
-  return result;
-}
-
 app.get("/createJob", (req, res) => {
-  postFix = makeid(5);
   var job = {
     apiVersion: "batch/v1",
     kind: "Job",
     metadata: {
-      name: "my-job-" + postFix,
+      generateName: "my-job-",
       //   labels: {
       //     name: "healthchecker-0002",
       //     deep: "healthchecker",
@@ -94,7 +88,7 @@ app.get("/createJob", (req, res) => {
     spec: {
       template: {
         metadata: {
-          name: "my-job-" + postFix,
+          generateName: "my-job-",
           //   labels: {
           //     name: "healthchecker-0002",
           //     deep: "healthchecker",

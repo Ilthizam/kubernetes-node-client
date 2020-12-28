@@ -1,5 +1,6 @@
 const express = require("express");
-const os = require("os");
+var async = require("async");
+
 const k8s = require("@kubernetes/client-node");
 const { BatchV1Api, V1ObjectMeta, V1Job } = require("@kubernetes/client-node");
 
@@ -11,23 +12,44 @@ kc.loadFromDefault();
 const k8sApi = kc.makeApiClient(k8s.CoreV1Api);
 const k8sApi2 = kc.makeApiClient(k8s.BatchV1Api);
 
-app.get("/", (req, res) => {
+function k8Listerner() {
   k8sApi2.listNamespacedJob("default").then((data) => {
-    temp = [];
+    // temp = [];
+    console.clear();
     data.body.items.forEach((element) => {
-      console.log(element.metadata.name);
-      temp.push(element.metadata.name);
-    });
-    res.send(temp);
-  });
-});
+      console.log(element.metadata.name + " " + element.status.succeeded);
 
-async function call() {
-  for (let i = 0; i < 5; i++) {
-    if (i === 3) await sleep(2000);
-    console.log(i);
-  }
+      // temp.push(element.metadata.name);
+    });
+  });
 }
+
+function k8Listerner2() {
+  console.log("Hi");
+}
+setInterval(k8Listerner, 5000);
+
+app.get("/", (req, res) => {
+  // async.parallel(
+  //   [
+  //     function () {
+  //       setInterval(k8Listerner, 2000);
+  //     },
+  //     function () {
+  //       setInterval(k8Listerner2, 1500);
+  //     },
+  //   ],
+  //   console.log("DONE")
+  // );
+  // k8sApi2.listNamespacedJob("default").then((data) => {
+  //   temp = [];
+  //   data.body.items.forEach((element) => {
+  //     console.log(element.metadata.name);
+  //     temp.push(element.metadata.name);
+  //   });
+  res.send("Started");
+  // });
+});
 
 app.get("/getPods", (req, res) => {
   k8sApi.listNamespacedPod("kube-system").then((data) => {

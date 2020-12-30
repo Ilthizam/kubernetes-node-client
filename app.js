@@ -1,8 +1,26 @@
 const express = require("express");
 var async = require("async");
+const mongoose = require("mongoose");
+const config = require("./db");
+
+mongoose.connect(config.uri, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+});
+
+mongoose.connection.on("connected", () => {
+  console.log("connected to database" + config.uri);
+});
+
+mongoose.connection.on("erorr", (err) => {
+  console.log("erorr");
+});
+
+const Log = require("./Models/log");
 
 const k8s = require("@kubernetes/client-node");
-const { BatchV1Api, V1ObjectMeta, V1Job } = require("@kubernetes/client-node");
+
+// const { BatchV1Api, V1ObjectMeta, V1Job } = require("@kubernetes/client-node");
 
 const app = express();
 
@@ -24,6 +42,14 @@ function k8Listerner() {
           k8sApi2
             .deleteNamespacedJob(element.metadata.name, "default")
             .then((reuslt) => {
+              Log.editLog(element.metadata.name, (err, log) => {
+                if (err) {
+                  console.log({ data: err, success: false, msg: "Error" });
+                }
+                {
+                  console.log({ data: log, success: true, msg: "Success" });
+                }
+              });
               console.log("Job Deleted: " + element.metadata.name);
             });
         } else {
@@ -74,6 +100,8 @@ app.get("/getPods", (req, res) => {
   });
 });
 
+
+
 app.get("/createJob", (req, res) => {
   var job = {
     apiVersion: "batch/v1",
@@ -117,6 +145,21 @@ app.get("/createJob", (req, res) => {
   k8sApi2
     .createNamespacedJob("default", job)
     .then((data) => {
+      // Log.addLog(data.body.metadata.name);
+
+      let newLog = new Log({
+        name: data.body.metadata.name,
+        status: 0,
+      });
+      Log.addLog(newLog, (err, log) => {
+        if (err) {
+          console.log({ data: err, success: false, msg: "Error" });
+        }
+        {
+          console.log({ data: log, success: true, msg: "Success" });
+        }
+      });
+
       console.log("done");
       res.send(data);
     })

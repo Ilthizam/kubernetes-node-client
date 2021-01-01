@@ -1,12 +1,22 @@
-FROM node:13-alpine
+  
+FROM node:12.4.0-alpine as debug
 
-WORKDIR /app
+WORKDIR /work/
 
-COPY package.json package-lock.json ./
+COPY ./src/package.json /work/package.json
+RUN npm install
+RUN npm install -g nodemon
 
-RUN npm install --production
+COPY ./src/ /work/src/
 
-COPY . .
+ENTRYPOINT [ "nodemon","--inspect=0.0.0.0","./src/app.js" ]
+
+FROM node:12.4.0-alpine as prod
+
+WORKDIR /work/
+COPY ./src/package.json /work/package.json
+RUN npm install
+COPY ./src/ /work/
 
 EXPOSE 3000
 

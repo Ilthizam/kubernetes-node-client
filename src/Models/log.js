@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const config = require("./db");
+const config = require("../db");
 
 const LogSchema = mongoose.Schema({
   name: { type: String },

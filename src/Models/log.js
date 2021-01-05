@@ -15,7 +15,14 @@ module.exports.addLog = function (newLog, callback) {
 // module.exports.editLog = function (log, callback) {
 //   Log.findByIdAndUpdate(log._id, { $set: log }, callback);
 // };
-
+module.exports.getAllLogs = function (callback) {
+  Log.find(callback);
+};
 module.exports.editLog = function (name, callback) {
-  Log.findOneAndUpdate({ name: name }, { $set: { status: 1 } }, { new: true },callback);
+  Log.findOneAndUpdate(
+    { name: name },
+    { $set: { status: 1 } },
+    { new: true },
+    callback
+  );
 };

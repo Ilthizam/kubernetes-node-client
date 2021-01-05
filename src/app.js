@@ -2,6 +2,7 @@ const express = require("express");
 var async = require("async");
 const mongoose = require("mongoose");
 const config = require("./db");
+const cors = require("cors");
 
 mongoose.connect(config.uri, {
   useNewUrlParser: true,
@@ -23,6 +24,7 @@ const k8s = require("@kubernetes/client-node");
 // const { BatchV1Api, V1ObjectMeta, V1Job } = require("@kubernetes/client-node");
 
 const app = express();
+app.use(cors());
 
 const kc = new k8s.KubeConfig();
 kc.loadFromCluster();
@@ -94,13 +96,29 @@ app.get("/", (req, res) => {
   //   res.send("Started");
   // });
 
-  k8sApi2
-    .listNamespacedJob("default")
-    .then((data) => {
-      console.log(data.body);
-      res.send(data.body);
-    })
-    .catch((err) => console.log(err));
+  // k8sApi2
+  //   .listNamespacedJob("default")
+  //   .then((data) => {
+  //     console.log(data.body);
+  //     res.send(data.body);
+  //   })
+  //   .catch((err) => console.log(err));
+
+  Log.getAllLogs((err, logs) => {
+    if (err) {
+      res.json({
+        data: err,
+        success: false,
+        msg: "failed",
+      });
+    } else {
+      res.json({
+        data: logs,
+        success: true,
+        msg: "all logs",
+      });
+    }
+  });
 });
 
 app.get("/getPods", (req, res) => {

@@ -159,15 +159,15 @@ app.get("/createJob", (req, res) => {
           restartPolicy: "Never",
           containers: [
             {
-              name: "busybox",
-              image: "busybox",
+              name: "node-alpine",
+              image: "ilthi96/node-alpine:latest",
               //   env: [
               //     {
               //       name: "APIHOST",
               //       value: "https://www.shuttlecloud.com",
               //     },
               //   ],
-              command: ["sleep", "20"],
+              // command: ["sleep", "20"],
             },
           ],
         },
